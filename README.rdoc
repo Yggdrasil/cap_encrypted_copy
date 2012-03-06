@@ -1,0 +1,40 @@
+= Encrypted Copy
+
+Encrypted Copy is a custom Capistrano deployment strategy that specializes the standard Copy strategy. It works just like the Copy, but before uploading the release to the remote server it uses Zend Guard to encrypt the PHP source.
+
+== Dependencies
+
+* Capistrano 2 or later (http://www.capify.org)
+* Zend Guard installed on client
+* Zend Guard Loader or Zend Optimizer PHP extensions installed on server (already included in Zend Server)
+
+== Assumptions
+
+* You're deploying a PHP application. Zend Guard encrypts only PHP source, so there's no real reason to use this deployment strategy otherwise.
+* You must have Zend Guard installed on the machine that runs your Capistrano recipe. Note: the path to zenenc5 is hardcoded.
+* You must have Zend Optimizer+ installed on the server that you deploy to. It is required in order to run encrypted PHP files.
+
+== Usage
+
+Note: Currently, the path to Zend Guard is hardcoded, which is actually not that bad compared to the mess that is the Zend Guard console tools. So, make sure you check the encoder path in encrypted_copy.rb. It's currently set to: /usr/local/Zend/ZendGuard-5_5_0/bin/zendenc5
+
+Load recipes/encrypted_copy.rb in your Capfile.
+
+Next, tell Capistrano to use the encrypted_copy deployment strategy by putting the following line in your Capfile:
+
+  set :deploy_via, :encrypted_copy
+
+Lastly, if you want to exclude certain directories or files from being deployed, set the copy_exclude variable:
+
+  set :copy_exclude, [ ".svn", "**/.svn", "source", "docs", ".git" ]
+
+The copy_exclude array can include glob patterns, if you want to get tricky.
+
+== Tips
+
+* The lifetime of the encrypted files depends on the licensing status of Zend Guard. Files encoded in trial mode will fail to run after 14 days.
+* The Zend Guard command-line tools are buggy mess. Check if your installation actually works before using this strategy. For example, can you run zendenc5?
+
+== License
+
+This code is released under the MIT license, and is copyright (c) 2012 by Martijn Heemels <martijn@heemels.com>. Please see the accompanying LICENSE file for the full text of the license.
